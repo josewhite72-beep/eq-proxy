@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0"/>
+<meta name="theme-color" content="#1a2332"/>
+<title>Generador de Instrumentos</title>
+<link rel="manifest" href="manifest.json"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap"/>
+<style>
+:root {
+  --bg: #f5f3ee;
+  --bg2: #eceae3;
+  --card: #ffffff;
+  --ink: #1a1a18;
+  --ink2: #5a5a52;
+  --ink3: #9a9a8e;
+  --accent: #2d5f3f;
+  --accent2: #4a8c5c;
+  --accent-lt: #e8f3ec;
+  --purple: #4a3a8c;
+  --purple-lt: #eeebf8;
+  --amber: #b05f1a;
+  --amber-lt: #fdf0e3;
+  --border: rgba(26,26,24,0.1);
+  --border2: rgba(26,26,24,0.18);
+  --radius: 12px;
+  --radius-lg: 18px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.07);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+}
+h1, h2, h3 { font-family: 'DM Serif Display', serif; font-weight: 400; }
+
+/* ── Header ── */
+.app-header {
+  background: #1a2332;
+  color: #f0ede6;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 58px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.app-header h1 { font-size: 19px; color: #f0ede6; letter-spacing: -0.01em; }
+.app-header .sub { font-size: 13px; color: #8a96a8; font-family: 'DM Sans', sans-serif; margin-left: 4px; }
+.header-actions { margin-left: auto; display: flex; gap: 8px; }
+.btn-sm {
+  padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 500;
+  border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.08);
+  color: #f0ede6; cursor: pointer; transition: background 0.15s;
+  font-family: 'DM Sans', sans-serif;
+}
+.btn-sm:hover { background: rgba(255,255,255,0.15); }
+.lang-toggle {
+  display: flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px; padding: 5px 10px; cursor: pointer;
+  font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+  transition: background 0.15s; user-select: none;
+}
+.lang-toggle:hover { background: rgba(255,255,255,0.15); }
+.lt-opt { color: rgba(240,237,230,0.45); transition: color 0.2s; }
+.lt-opt.active { color: #f0ede6; }
+.lt-sep { color: rgba(240,237,230,0.25); font-weight: 300; }
+
+/* ── Main layout ── */
+.main { max-width: 900px; margin: 0 auto; padding: 28px 20px 60px; }
+
+/* ── Steps ── */
+.steps-bar {
+  display: flex; gap: 0; margin-bottom: 32px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+}
+.step-tab {
+  flex: 1; padding: 13px 8px; text-align: center; cursor: pointer;
+  font-size: 13px; font-weight: 500; color: var(--ink3);
+  border-right: 1px solid var(--border); transition: all 0.2s;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  min-height: 64px; justify-content: center;
+}
+.step-tab:last-child { border-right: none; }
+.step-tab .step-num {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--bg2); color: var(--ink3);
+  font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.step-tab.active { background: var(--accent-lt); color: var(--accent); }
+.step-tab.active .step-num { background: var(--accent); color: #fff; }
+.step-tab.done { color: var(--accent2); }
+.step-tab.done .step-num { background: var(--accent-lt); color: var(--accent); }
+
+/* ── Panels ── */
+.panel { display: none; animation: fadeIn 0.25s ease; }
+.panel.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── Cards ── */
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 24px; margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+.card-title {
+  font-size: 19px; font-family: 'DM Serif Display', serif;
+  margin-bottom: 20px; color: var(--ink);
+  display: flex; align-items: center; gap: 10px;
+}
+.card-title .icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+}
+.icon-green { background: var(--accent-lt); }
+.icon-purple { background: var(--purple-lt); }
+.icon-amber { background: var(--amber-lt); }
+
+/* ── Form elements ── */
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.field-row.three { grid-template-columns: 1fr 1fr 1fr; }
+.field-row.full { grid-template-columns: 1fr; }
+@media(max-width:600px){ .field-row, .field-row.three { grid-template-columns: 1fr; } }
+
+.field label {
+  display: block; font-size: 13px; font-weight: 600;
+  color: var(--ink2); margin-bottom: 6px; letter-spacing: 0.03em; text-transform: uppercase;
+}
+.field input, .field select, .field textarea {
+  width: 100%; padding: 10px 12px;
+  border: 1px solid var(--border2); border-radius: 8px;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink);
+  background: var(--bg); transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--accent); box-shadow: 0 0 0 3px rgba(45,95,63,0.12);
+}
+.field textarea { resize: vertical; min-height: 72px; }
+.field select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235a5a52' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+
+/* ── Instrument type selector ── */
+.type-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px; margin-bottom: 6px;
+}
+.type-card {
+  border: 1.5px solid var(--border2); border-radius: var(--radius);
+  padding: 14px 12px; cursor: pointer; transition: all 0.15s;
+  text-align: center; background: var(--bg);
+}
+.type-card:hover { border-color: var(--accent); background: var(--accent-lt); }
+.type-card.selected { border-color: var(--accent); background: var(--accent-lt); }
+.type-card .ticon { font-size: 26px; margin-bottom: 6px; }
+.type-card .tname { font-size: 14px; font-weight: 600; color: var(--ink); }
+.type-card .tdesc { font-size: 12px; color: var(--ink3); margin-top: 3px; }
+
+/* ── CSV upload ── */
+.upload-zone {
+  border: 2px dashed var(--border2); border-radius: var(--radius);
+  padding: 28px; text-align: center; cursor: pointer; transition: all 0.2s;
+  background: var(--bg);
+}
+.upload-zone:hover, .upload-zone.drag { border-color: var(--accent); background: var(--accent-lt); }
+.upload-zone .uz-icon { font-size: 32px; margin-bottom: 8px; }
+.upload-zone p { font-size: 13px; color: var(--ink2); }
+.upload-zone strong { color: var(--accent); }
+#file-input { display: none; }
+
+.student-list {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px;
+}
+.student-chip {
+  background: var(--accent-lt); color: var(--accent);
+  border: 1px solid rgba(45,95,63,0.2);
+  border-radius: 20px; padding: 4px 12px; font-size: 13px;
+  display: flex; align-items: center; gap: 5px;
+}
+.student-chip button {
+  background: none; border: none; cursor: pointer; color: var(--accent2);
+  font-size: 14px; line-height: 1; padding: 0;
+}
+.add-manual { display: flex; gap: 8px; margin-top: 10px; }
+.add-manual input { flex: 1; }
+
+/* ── IA Panel ── */
+.prompt-preview {
+  background: var(--bg2); border-radius: 8px; padding: 14px;
+  font-size: 13px; color: var(--ink2); line-height: 1.7;
+  border-left: 3px solid var(--accent); margin-bottom: 16px;
+  white-space: pre-wrap; word-break: break-word;
+}
+.btn-generate {
+  width: 100%; padding: 13px; border-radius: var(--radius);
+  background: var(--accent); color: #fff; font-size: 15px; font-weight: 600;
+  border: none; cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: background 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 48px;
+}
+.btn-generate:hover { background: var(--accent2); }
+.btn-generate:disabled { background: var(--ink3); cursor: not-allowed; }
+.spinner {
+  width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff; border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Criteria editor ── */
+.criteria-list { display: flex; flex-direction: column; gap: 10px; }
+.criteria-item {
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 12px 14px; display: flex; gap: 10px; align-items: flex-start;
+}
+.criteria-item .ci-num {
+  min-width: 26px; height: 26px; background: var(--accent-lt); color: var(--accent);
+  border-radius: 50%; font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; margin-top: 1px;
+}
+.criteria-item input {
+  flex: 1; border: none; background: transparent; font-family: 'DM Sans', sans-serif;
+  font-size: 14px; color: var(--ink); outline: none; padding: 2px 0;
+}
+.criteria-item .ci-del {
+  background: none; border: none; cursor: pointer; color: var(--ink3);
+  font-size: 16px; padding: 2px; transition: color 0.15s;
+}
+.criteria-item .ci-del:hover { color: #c0392b; }
+.btn-add-crit {
+  margin-top: 10px; padding: 8px 16px; border-radius: 8px;
+  border: 1.5px dashed var(--border2); background: transparent;
+  color: var(--accent); font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: all 0.15s; font-family: 'DM Sans', sans-serif;
+}
+.btn-add-crit:hover { border-color: var(--accent); background: var(--accent-lt); }
+
+/* ── Rubric descriptors ── */
+.rubric-grid { overflow-x: auto; }
+.rubric-table {
+  width: 100%; border-collapse: collapse; font-size: 13px; min-width: 500px;
+}
+.rubric-table th {
+  background: #1a2332; color: #f0ede6; padding: 8px 10px;
+  text-align: center; font-weight: 500; font-family: 'DM Sans', sans-serif;
+}
+.rubric-table th:first-child { text-align: left; min-width: 140px; }
+.rubric-table td { border: 1px solid var(--border); padding: 6px; vertical-align: top; }
+.rubric-table td:first-child { font-weight: 600; font-size: 13px; color: var(--ink2); padding: 8px 10px; }
+.rubric-table textarea {
+  width: 100%; border: none; background: transparent; font-family: 'DM Sans', sans-serif;
+  font-size: 12px; color: var(--ink); resize: none; outline: none; min-height: 54px;
+  line-height: 1.5;
+}
+
+/* ── Anecdotal ── */
+.anec-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.anec-table th {
+  background: #1a2332; color: #f0ede6; padding: 8px 10px;
+  text-align: left; font-weight: 500;
+}
+.anec-table td { border: 1px solid var(--border); padding: 0; }
+.anec-table td.name-cell { padding: 8px 10px; font-weight: 500; min-width: 140px; background: var(--bg2); }
+.anec-table td textarea {
+  width: 100%; border: none; padding: 8px 10px; font-family: 'DM Sans', sans-serif;
+  font-size: 13px; resize: none; outline: none; min-height: 52px; background: transparent; color: var(--ink);
+}
+
+/* ── Score table (cotejo / numerica / estimacion) ── */
+.score-table-wrap { overflow-x: auto; }
+.score-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.score-table th {
+  background: #1a2332; color: #f0ede6; padding: 10px 10px;
+  text-align: center; font-weight: 500; white-space: nowrap;
+}
+.score-table th.name-th { text-align: left; min-width: 140px; }
+.score-table td { border: 1px solid var(--border); padding: 6px 8px; text-align: center; vertical-align: middle; }
+.score-table td.name-td { text-align: left; font-weight: 500; background: var(--bg2); }
+.score-table td.avg-td { font-weight: 700; background: var(--accent-lt); color: var(--accent); }
+
+/* Score buttons 1-4 */
+.score-btns { display: flex; gap: 3px; justify-content: center; }
+.sc { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid var(--border2); background: var(--bg); font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.12s; color: var(--ink2); }
+.sc:hover { transform: scale(1.1); }
+.sc.s1.on { background: #fde8e8; border-color: #e57373; color: #c0392b; }
+.sc.s2.on { background: var(--amber-lt); border-color: #e8a44a; color: var(--amber); }
+.sc.s3.on { background: #e3f0fb; border-color: #6aabe8; color: #185FA5; }
+.sc.s4.on { background: var(--accent-lt); border-color: #6abf8a; color: var(--accent); }
+
+/* Numeric input */
+.num-input {
+  width: 56px; text-align: center; padding: 5px 4px;
+  border: 1px solid var(--border2); border-radius: 6px;
+  font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+  background: var(--bg); color: var(--ink); outline: none;
+}
+.num-input:focus { border-color: var(--accent); }
+
+/* Estimation */
+.est-btns { display: flex; gap: 4px; justify-content: center; }
+.eb { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border2); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.12s; background: var(--bg); color: var(--ink2); white-space: nowrap; min-height: 34px; }
+.eb:hover { transform: scale(1.04); }
+.eb.e0.on { background: var(--accent-lt); border-color: var(--accent2); color: var(--accent); }
+.eb.e1.on { background: var(--amber-lt); border-color: #e8a44a; color: var(--amber); }
+.eb.e2.on { background: #fde8e8; border-color: #e57373; color: #c0392b; }
+
+/* ── Export bar ── */
+.export-bar {
+  display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px;
+}
+.btn-export {
+  flex: 1; min-width: 140px; padding: 13px 16px; border-radius: var(--radius);
+  border: 1.5px solid var(--border2); background: var(--card);
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s; color: var(--ink);
+  min-height: 46px;
+}
+.btn-export:hover { border-color: var(--accent); background: var(--accent-lt); color: var(--accent); }
+.btn-export.primary { background: #1a2332; color: #f0ede6; border-color: #1a2332; }
+.btn-export.primary:hover { background: #2a3a52; }
+
+/* ── Nav buttons ── */
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
+.btn-nav {
+  padding: 11px 22px; border-radius: var(--radius); border: 1.5px solid var(--border2);
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s; background: var(--card); color: var(--ink);
+  min-height: 44px;
+}
+.btn-nav:hover { border-color: var(--accent); color: var(--accent); }
+.btn-nav.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-nav.primary:hover { background: var(--accent2); }
+
+/* ── Info box ── */
+.info-box {
+  background: var(--purple-lt); border: 1px solid rgba(74,58,140,0.15);
+  border-radius: var(--radius); padding: 12px 16px;
+  font-size: 13px; color: var(--purple); margin-bottom: 16px;
+}
+
+/* ── Tabs (template library) ── */
+.template-list { display: flex; flex-direction: column; gap: 8px; }
+.template-item {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 12px 16px; cursor: pointer; transition: all 0.15s;
+}
+.template-item:hover { border-color: var(--accent); background: var(--accent-lt); }
+.template-item .ti-name { font-weight: 600; font-size: 14px; }
+.template-item .ti-meta { font-size: 12px; color: var(--ink3); margin-top: 2px; }
+.template-item .ti-del { color: var(--ink3); background: none; border: none; cursor: pointer; font-size: 16px; padding: 2px 6px; border-radius: 4px; }
+.template-item .ti-del:hover { background: #fde8e8; color: #c0392b; }
+
+/* empty state */
+.empty-state { text-align: center; padding: 40px 20px; color: var(--ink3); }
+.empty-state .es-icon { font-size: 40px; margin-bottom: 12px; }
+.empty-state p { font-size: 14px; }
+
+/* ── Toast ── */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: #1a2332; color: #f0ede6; padding: 10px 20px; border-radius: 24px;
+  font-size: 13px; font-weight: 500; z-index: 999; opacity: 0;
+  transition: all 0.3s; pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Print */
+@media print {
+  .app-header, .steps-bar, .nav-row, .export-bar, .card-title .icon,
+  .btn-generate, .criteria-item .ci-del, .btn-add-crit, .panel:not(.active) { display: none !important; }
+  body { background: #fff; font-size: 12px; }
+  .card { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+  .score-table th, .rubric-table th, .anec-table th { background: #1a2332 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <h1>Generador de Instrumentos <span class="sub">ESL · Panama</span></h1>
+  <div class="header-actions">
+    <div class="lang-toggle" id="lang-toggle" onclick="toggleLang()" title="Switch language / Cambiar idioma">
+      <span class="lt-opt" id="lt-es">ES</span>
+      <span class="lt-sep">|</span>
+      <span class="lt-opt" id="lt-en">EN</span>
+    </div>
+    <button class="btn-sm" id="btn-templates" onclick="showPanel('templates')">📋 Plantillas</button>
+    <button class="btn-sm" id="btn-print" onclick="window.print()">🖨 Imprimir</button>
+  </div>
+</header>
+
+<div class="main">
+
+  <div class="steps-bar">
+    <div class="step-tab active" id="tab-1" onclick="goStep(1)">
+      <span class="step-num">1</span>Configurar
+    </div>
+    <div class="step-tab" id="tab-2" onclick="goStep(2)">
+      <span class="step-num">2</span>Estudiantes
+    </div>
+    <div class="step-tab" id="tab-3" onclick="goStep(3)">
+      <span class="step-num">3</span>Criterios IA
+    </div>
+    <div class="step-tab" id="tab-4" onclick="goStep(4)">
+      <span class="step-num">4</span>Instrumento
+    </div>
+    <div class="step-tab" id="tab-5" onclick="goStep(5)">
+      <span class="step-num">5</span>Plantillas
+    </div>
+  </div>
+
+  <!-- ══════════ STEP 1: Config ══════════ -->
+  <div class="panel active" id="panel-1">
+    <div class="card">
+      <div class="card-title"><span class="icon icon-green">⚙️</span> <span id="s1title" data-i18n="s1title">Configuración del instrumento</span></div>
+
+      <div class="field-row three">
+        <div class="field">
+          <label id="lbl-grade">Grado</label>
+          <select id="cfg-grade">
+            <option value="">— Seleccionar —</option>
+            <option>PreK</option><option>Kinder</option>
+            <option>1st Grade</option><option>2nd Grade</option>
+            <option>3rd Grade</option><option>4th Grade</option>
+            <option>5th Grade</option><option>6th Grade</option>
+          </select>
+        </div>
+        <div class="field">
+          <label id="lbl-section">Sección</label>
+          <input type="text" id="cfg-section" placeholder="Ej: A / B / Morning"/>
+        </div>
+        <div class="field">
+          <label id="lbl-date">Fecha</label>
+          <input type="date" id="cfg-date"/>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label id="lbl-skill">Skill / área evaluada</label>
+          <input type="text" id="cfg-skill" placeholder="Ej: Reading Comprehension, Speaking, Writing…"/>
+        </div>
+        <div class="field">
+          <label id="lbl-activity">Tipo de actividad</label>
+          <input type="text" id="cfg-activity" placeholder="Ej: poesía, maqueta, proyecto, charla, ejercicio oral…" list="activity-suggestions"/>
+          <datalist id="activity-suggestions">
+            <option value="poesía recitada"/>
+            <option value="charla expositiva"/>
+            <option value="maqueta"/>
+            <option value="proyecto grupal"/>
+            <option value="ejercicio oral"/>
+            <option value="presentación con diapositivas"/>
+            <option value="cuento narrado"/>
+            <option value="debate"/>
+            <option value="entrevista"/>
+            <option value="dictado"/>
+            <option value="ensayo escrito"/>
+            <option value="juego de roles"/>
+            <option value="experimento"/>
+          </datalist>
+        </div>
+      </div>
+
+      <div class="field-row full">
+        <div class="field">
+          <label id="lbl-desc">Descripción adicional (opcional — ayuda a la IA)</label>
+          <textarea id="cfg-desc" placeholder="Ej: Los estudiantes presentarán una poesía corta memorizada frente a la clase sobre temas de naturaleza, con pronunciación y expresión como criterios principales."></textarea>
+        </div>
+      </div>
+
+      <div style="margin-top:8px;">
+        <p id="lbl-instrtype" style="font-size:12px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:10px;">Tipo de instrumento</p>
+        <div class="type-grid" id="type-grid">
+          <div class="type-card selected" data-type="cotejo" onclick="selectType(this)">
+            <div class="ticon">☑️</div>
+            <div class="tname">Lista de cotejo</div>
+            <div class="tdesc">Escala 1–4 por criterio</div>
+          </div>
+          <div class="type-card" data-type="rubrica" onclick="selectType(this)">
+            <div class="ticon">📊</div>
+            <div class="tname">Rúbrica analítica</div>
+            <div class="tdesc">Descriptores por nivel</div>
+          </div>
+          <div class="type-card" data-type="estimacion" onclick="selectType(this)">
+            <div class="ticon">🔘</div>
+            <div class="tname">Escala de estimación</div>
+            <div class="tdesc">Siempre / A veces / Nunca</div>
+          </div>
+          <div class="type-card" data-type="anecdotico" onclick="selectType(this)">
+            <div class="ticon">📝</div>
+            <div class="tname">Registro anecdótico</div>
+            <div class="tdesc">Observación abierta</div>
+          </div>
+          <div class="type-card" data-type="numerica" onclick="selectType(this)">
+            <div class="ticon">🔢</div>
+            <div class="tname">Escala numérica</div>
+            <div class="tdesc">Puntuación 0–100</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <div></div>
+      <button class="btn-nav primary" id="btn-next-1" onclick="goStep(2)">Siguiente → Estudiantes</button>
+    </div>
+  </div>
+
+  <!-- ══════════ STEP 2: Students ══════════ -->
+  <div class="panel" id="panel-2">
+    <div class="card">
+      <div class="card-title"><span class="icon icon-green">👥</span> <span id="s2title">Lista de estudiantes</span></div>
+
+      <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+        <input type="file" id="file-input" accept=".csv,.txt" onchange="handleCSV(event)"/>
+        <div class="uz-icon">📂</div>
+        <p><strong id="uz-title">Cargar CSV</strong> <span id="uz-sub">con los nombres</span></p>
+        <p id="uz-hint" style="font-size:12px;margin-top:4px;color:var(--ink3)">Un nombre por fila · también puedes arrastrar el archivo</p>
+      </div>
+
+      <div class="add-manual" style="margin-top:14px;">
+        <div class="field" style="flex:1;margin:0">
+          <input type="text" id="manual-name" placeholder="Agregar estudiante manualmente…" onkeydown="if(event.key==='Enter')addManual()"/>
+        </div>
+        <button class="btn-nav" style="white-space:nowrap" id="btn-add-st" onclick="addManual()">+ Agregar</button>
+      </div>
+
+      <div class="student-list" id="student-list"></div>
+
+      <p style="font-size:12px;color:var(--ink3);margin-top:14px;">
+        <strong id="student-count">0</strong> estudiantes cargados
+      </p>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-nav" id="btn-back-2" onclick="goStep(1)">← Atrás</button>
+      <button class="btn-nav primary" id="btn-next-2" onclick="goStep(3)">Siguiente → Criterios IA</button>
+    </div>
+  </div>
+
+  <!-- ══════════ STEP 3: IA Criteria ══════════ -->
+  <div class="panel" id="panel-3">
+    <div class="card">
+      <div class="card-title"><span class="icon icon-purple">🤖</span> <span id="s3title">Generación de criterios con IA</span></div>
+
+      <div class="info-box" id="ia-context-box">
+        Completando datos de configuración…
+      </div>
+
+      <p id="ia-hint" style="font-size:13px;color:var(--ink2);margin-bottom:14px;">La IA generará los criterios según el grado, skill y tipo de actividad. Podrás editarlos en el siguiente paso.</p>
+
+      <div class="prompt-preview" id="prompt-preview">Cargando previsualización…</div>
+
+      <button class="btn-generate" id="btn-gen" onclick="generateCriteria()">
+        <span>✨</span> Generar criterios con IA
+      </button>
+
+      <div style="margin-top:20px;border-top:1px solid var(--border);padding-top:18px;">
+        <p id="manual-criteria-lbl" style="font-size:13px;font-weight:700;color:var(--ink2);margin-bottom:10px;">O ingresa los criterios manualmente:</p>
+        <div class="criteria-list" id="manual-criteria-list"></div>
+        <button class="btn-add-crit" id="btn-add-crit-main" onclick="addManualCriteria()">+ Añadir criterio</button>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-nav" id="btn-back-3" onclick="goStep(2)">← Atrás</button>
+      <button class="btn-nav primary" id="btn-next-3" onclick="buildInstrument()">Siguiente → Ver instrumento</button>
+    </div>
+  </div>
+
+  <!-- ══════════ STEP 4: Instrument ══════════ -->
+  <div class="panel" id="panel-4">
+    <div class="card" id="instrument-header-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h2 style="font-size:22px;margin-bottom:4px;" id="inst-title">Instrumento de evaluación</h2>
+          <p style="font-size:13px;color:var(--ink2);" id="inst-meta"></p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;" id="inst-legend"></div>
+      </div>
+    </div>
+
+    <div class="card" id="instrument-body">
+    </div>
+
+    <div class="export-bar">
+      <button class="btn-export primary" id="btn-exp-pdf" onclick="exportPDF()">📄 Exportar PDF</button>
+      <button class="btn-export" id="btn-exp-csv" onclick="exportCSV()">📊 Exportar CSV</button>
+      <button class="btn-export" id="btn-save-tpl" onclick="saveTemplate()">💾 Guardar plantilla</button>
+      <button class="btn-export" id="btn-share" onclick="shareLink()">🔗 Compartir enlace</button>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-nav" id="btn-back-4" onclick="goStep(3)">← Editar criterios</button>
+      <button class="btn-nav" id="btn-new" onclick="goStep(1)">🔄 Nuevo instrumento</button>
+    </div>
+  </div>
+
+  <!-- ══════════ STEP 5: Templates ══════════ -->
+  <div class="panel" id="panel-5">
+    <div class="card">
+      <div class="card-title"><span class="icon icon-amber">📋</span> <span id="s5title">Plantillas guardadas</span></div>
+      <div class="template-list" id="template-list">
+        <div class="empty-state">
+          <div class="es-icon">📂</div>
+          <p id="empty-tpl-p">No hay plantillas guardadas aún.<br>Genera un instrumento y guárdalo como plantilla.</p>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-nav" id="btn-back-5" onclick="goStep(1)">← Volver al inicio</button>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+<script>
+// ── i18n ──
+const T = {
+  es: {
+    appTitle: 'Generador de Instrumentos',
+    appSub: 'ESL · Panamá',
+    btnTemplates: '📋 Plantillas',
+    btnPrint: '🖨 Imprimir',
+    step1: 'Configurar', step2: 'Estudiantes', step3: 'Criterios IA', step4: 'Instrumento', step5: 'Plantillas',
+    s1title: 'Configuración del instrumento',
+    lblGrade: 'Grado', lblSection: 'Sección', lblDate: 'Fecha',
+    lblSkill: 'Skill / área evaluada', phSkill: 'Ej: Reading Comprehension, Speaking, Writing…',
+    lblActivity: 'Tipo de actividad', phActivity: 'Ej: poesía, maqueta, proyecto, charla, ejercicio oral…',
+    lblDesc: 'Descripción adicional (opcional — ayuda a la IA)',
+    phDesc: 'Ej: Los estudiantes presentarán una poesía corta memorizada frente a la clase…',
+    lblInstrType: 'Tipo de instrumento',
+    gradeDefault: '— Seleccionar —',
+    t_cotejo: 'Lista de cotejo', t_cotejo_d: 'Escala 1–4 por criterio',
+    t_rubrica: 'Rúbrica analítica', t_rubrica_d: 'Descriptores por nivel',
+    t_estimacion: 'Escala de estimación', t_estimacion_d: 'Siempre / A veces / Nunca',
+    t_anecdotico: 'Registro anecdótico', t_anecdotico_d: 'Observación abierta',
+    t_numerica: 'Escala numérica', t_numerica_d: 'Puntuación 0–100',
+    btnNext1: 'Siguiente → Estudiantes',
+    s2title: 'Lista de estudiantes',
+    uzTitle: 'Cargar CSV', uzSub: 'con los nombres',
+    uzHint: 'Un nombre por fila · también puedes arrastrar el archivo',
+    phManual: 'Agregar estudiante manualmente…', btnAddSt: '+ Agregar',
+    stCount: 'estudiantes cargados',
+    btnBack: '← Atrás', btnNext2: 'Siguiente → Criterios IA',
+    s3title: 'Generación de criterios con IA',
+    iaHint: 'La IA generará los criterios según el grado, skill y tipo de actividad. Podrás editarlos en el siguiente paso.',
+    btnGenerate: '✨ Generar criterios con IA', generating: 'Generando…',
+    manualLabel: 'O ingresa los criterios manualmente:',
+    phCriteria: 'Criterio', btnAddCrit: '+ Añadir criterio',
+    btnNext3: 'Siguiente → Ver instrumento',
+    s4title: 'Instrumento de evaluación',
+    btnExportPDF: '📄 Exportar PDF', btnExportCSV: '📊 Exportar CSV',
+    btnSaveTpl: '💾 Guardar plantilla', btnShare: '🔗 Compartir enlace',
+    btnEditCrit: '← Editar criterios', btnNewInstr: '🔄 Nuevo instrumento',
+    s5title: 'Plantillas guardadas',
+    btnBackToStart: '← Volver al inicio',
+    emptyTpl: 'No hay plantillas guardadas aún.<br>Genera un instrumento y guárdalo como plantilla.',
+    savedOn: 'Guardada el', criteriaCount: 'criterios',
+    shareToast: '🔗 Enlace copiado al portapapeles',
+    saveToast: '💾 Plantilla guardada',
+    deleteToast: '🗑 Plantilla eliminada',
+    loadToast: '📋 Plantilla cargada — revisa la configuración',
+    genOK: '✅ Criterios generados correctamente',
+    genErr: '⚠️ Error al contactar la IA. Ingresa los criterios manualmente.',
+    csvToast: '📊 CSV descargado',
+    printToast: '🖨 Usando el diálogo de impresión — selecciona Guardar como PDF',
+    linkToast: '🔗 Instrumento cargado desde enlace',
+    errNoCrit: 'Agrega al menos un criterio',
+    errNoSt: 'Agrega al menos un estudiante',
+    l1: '1 No logrado', l2: '2 En proceso', l3: '3 Logrado', l4: '4 Excelente',
+    lS: 'S Siempre', lA: 'A A veces', lN: 'N Nunca',
+    colStudent: 'Estudiante', colAvg: 'Prom.', colTotal: 'Total', colObs: 'Observaciones',
+    rubLvl4: '4 — Excelente', rubLvl3: '3 — Logrado', rubLvl2: '2 — En proceso', rubLvl1: '1 — No logrado',
+    rubPlh: 'Descripción nivel',
+    anecPlh: 'Observaciones sobre',
+    avgRow: 'Promedio criterio',
+    promptLang: 'En español.',
+    tplMeta: 'criterios',
+    promptSystem: 'Eres un experto en evaluación educativa para ESL en Panamá.\nGenera exactamente 5 criterios de evaluación para:\n  - Grado: {grade} {section}\n  - Skill: {skill}\n  - Tipo de actividad: {activity}\n  - Tipo de instrumento: {type}\n  {desc}\n\nResponde SOLO en JSON con este formato exacto (sin markdown ni texto extra):\n{"criterios":["criterio 1","criterio 2","criterio 3","criterio 4","criterio 5"]}\n\nLos criterios deben ser concretos, observables, apropiados para el nivel del grado y la actividad específica. En español.',
+    promptContextPfx: '- Contexto adicional: ',
+    typeCotejo: 'Lista de cotejo (escala 1–4)', typeRubrica: 'Rúbrica analítica',
+    typeEstimacion: 'Escala de estimación', typeAnecdotico: 'Registro anecdótico', typeNumerica: 'Escala numérica',
+    estS: 'Siempre', estA: 'A veces', estN: 'Nunca',
+  },
+  en: {
+    appTitle: 'Assessment Generator',
+    appSub: 'ESL · Panama',
+    btnTemplates: '📋 Templates',
+    btnPrint: '🖨 Print',
+    step1: 'Setup', step2: 'Students', step3: 'AI Criteria', step4: 'Instrument', step5: 'Templates',
+    s1title: 'Instrument configuration',
+    lblGrade: 'Grade', lblSection: 'Section', lblDate: 'Date',
+    lblSkill: 'Skill / area assessed', phSkill: 'E.g.: Reading Comprehension, Speaking, Writing…',
+    lblActivity: 'Activity type', phActivity: 'E.g.: poem recitation, model, project, oral exercise, debate…',
+    lblDesc: 'Additional description (optional — helps the AI)',
+    phDesc: 'E.g.: Students will recite a short memorized poem in front of the class…',
+    lblInstrType: 'Instrument type',
+    gradeDefault: '— Select —',
+    t_cotejo: 'Checklist', t_cotejo_d: 'Scale 1–4 per criterion',
+    t_rubrica: 'Analytic rubric', t_rubrica_d: 'Descriptors per level',
+    t_estimacion: 'Rating scale', t_estimacion_d: 'Always / Sometimes / Never',
+    t_anecdotico: 'Anecdotal record', t_anecdotico_d: 'Open observation',
+    t_numerica: 'Numeric scale', t_numerica_d: 'Score 0–100',
+    btnNext1: 'Next → Students',
+    s2title: 'Student list',
+    uzTitle: 'Upload CSV', uzSub: 'with student names',
+    uzHint: 'One name per row · you can also drag the file',
+    phManual: 'Add student manually…', btnAddSt: '+ Add',
+    stCount: 'students loaded',
+    btnBack: '← Back', btnNext2: 'Next → AI Criteria',
+    s3title: 'AI criteria generation',
+    iaHint: 'The AI will generate criteria based on the grade, skill and activity type. You can edit them in the next step.',
+    btnGenerate: '✨ Generate criteria with AI', generating: 'Generating…',
+    manualLabel: 'Or enter criteria manually:',
+    phCriteria: 'Criterion', btnAddCrit: '+ Add criterion',
+    btnNext3: 'Next → View instrument',
+    s4title: 'Assessment instrument',
+    btnExportPDF: '📄 Export PDF', btnExportCSV: '📊 Export CSV',
+    btnSaveTpl: '💾 Save template', btnShare: '🔗 Share link',
+    btnEditCrit: '← Edit criteria', btnNewInstr: '🔄 New instrument',
+    s5title: 'Saved templates',
+    btnBackToStart: '← Back to start',
+    emptyTpl: 'No saved templates yet.<br>Generate an instrument and save it as a template.',
+    savedOn: 'Saved on', criteriaCount: 'criteria',
+    shareToast: '🔗 Link copied to clipboard',
+    saveToast: '💾 Template saved',
+    deleteToast: '🗑 Template deleted',
+    loadToast: '📋 Template loaded — review the configuration',
+    genOK: '✅ Criteria generated successfully',
+    genErr: '⚠️ Could not reach AI. Enter criteria manually.',
+    csvToast: '📊 CSV downloaded',
+    printToast: '🖨 Using print dialog — select Save as PDF',
+    linkToast: '🔗 Instrument loaded from link',
+    errNoCrit: 'Add at least one criterion',
+    errNoSt: 'Add at least one student',
+    l1: '1 Not achieved', l2: '2 In progress', l3: '3 Achieved', l4: '4 Excellent',
+    lS: 'A Always', lS2: 'S Sometimes', lN: 'N Never',
+    lA: 'S Sometimes',
+    colStudent: 'Student', colAvg: 'Avg.', colTotal: 'Total', colObs: 'Observations',
+    rubLvl4: '4 — Excellent', rubLvl3: '3 — Achieved', rubLvl2: '2 — In progress', rubLvl1: '1 — Not achieved',
+    rubPlh: 'Description level',
+    anecPlh: 'Observations for',
+    avgRow: 'Criterion average',
+    promptLang: 'In English.',
+    tplMeta: 'criteria',
+    promptSystem: 'You are an expert in educational assessment for ESL in Panama.\nGenerate exactly 5 assessment criteria for:\n  - Grade: {grade} {section}\n  - Skill: {skill}\n  - Activity type: {activity}\n  - Instrument type: {type}\n  {desc}\n\nRespond ONLY in JSON with this exact format (no markdown or extra text):\n{"criterios":["criterion 1","criterion 2","criterion 3","criterion 4","criterion 5"]}\n\nCriteria must be concrete, observable, and appropriate for the grade level and specific activity. In English.',
+    promptContextPfx: '- Additional context: ',
+    typeCotejo: 'Checklist (scale 1–4)', typeRubrica: 'Analytic rubric',
+    typeEstimacion: 'Rating scale', typeAnecdotico: 'Anecdotal record', typeNumerica: 'Numeric scale',
+    estS: 'Always', estA: 'Sometimes', estN: 'Never',
+  }
+};
+
+let lang = localStorage.getItem('instr_lang') || 'es';
+function t(k) { return T[lang][k] || T.es[k] || k; }
+
+function toggleLang() {
+  lang = lang === 'es' ? 'en' : 'es';
+  localStorage.setItem('instr_lang', lang);
+  applyLang();
+}
+
+function applyLang() {
+  const isEN = lang === 'en';
+  document.getElementById('lt-es').classList.toggle('active', !isEN);
+  document.getElementById('lt-en').classList.toggle('active', isEN);
+  document.querySelector('.app-header h1').childNodes[0].textContent = t('appTitle') + ' ';
+  document.querySelector('.app-header .sub').textContent = t('appSub');
+  document.getElementById('btn-templates').textContent = t('btnTemplates');
+  document.getElementById('btn-print').textContent = t('btnPrint');
+  // Steps
+  ['1','2','3','4','5'].forEach((n,i) => {
+    const tab = document.getElementById('tab-'+n);
+    tab.childNodes[1].textContent = t('step'+(i+1));
+  });
+  // Step 1 labels
+  qt('cfg-grade-lbl', 'lblGrade'); qp('cfg-section', 'lblSection', true);
+  qp('cfg-skill', 'phSkill'); qp('cfg-activity', 'phActivity');
+  qp('cfg-desc', 'phDesc');
+  ql('lbl-grade', 'lblGrade'); ql('lbl-section', 'lblSection'); ql('lbl-date', 'lblDate');
+  ql('lbl-skill', 'lblSkill'); ql('lbl-activity', 'lblActivity'); ql('lbl-desc', 'lblDesc');
+  ql('lbl-instrtype', 'lblInstrType');
+  // Grade select first option
+  const gradeEl = document.getElementById('cfg-grade');
+  if(gradeEl) gradeEl.options[0].text = t('gradeDefault');
+  // Type cards
+  const types = ['cotejo','rubrica','estimacion','anecdotico','numerica'];
+  types.forEach(tp => {
+    const card = document.querySelector(`.type-card[data-type="${tp}"]`);
+    if(card) {
+      card.querySelector('.tname').textContent = t('t_'+tp);
+      card.querySelector('.tdesc').textContent = t('t_'+tp+'_d');
+    }
+  });
+  // Buttons
+  qtxt('btn-next-1', 'btnNext1'); qtxt('btn-back-2', 'btnBack'); qtxt('btn-next-2', 'btnNext2');
+  qtxt('btn-back-3', 'btnBack'); qtxt('btn-next-3', 'btnNext3');
+  qtxt('btn-back-4', 'btnEditCrit'); qtxt('btn-new', 'btnNewInstr');
+  qtxt('btn-back-5', 'btnBackToStart');
+  // Upload zone
+  const uzTitle = document.getElementById('uz-title');
+  const uzSub = document.getElementById('uz-sub');
+  const uzHint = document.getElementById('uz-hint');
+  if(uzTitle) uzTitle.textContent = t('uzTitle');
+  if(uzSub) uzSub.textContent = t('uzSub');
+  if(uzHint) uzHint.textContent = t('uzHint');
+  const manualNameEl = document.getElementById('manual-name');
+  if(manualNameEl) manualNameEl.placeholder = t('phManual');
+  qtxt('btn-add-st', 'btnAddSt');
+  ql('s2title', 's2title'); ql('s3title', 's3title');
+  ql('s5title', 's5title');
+  // Step 3 hint
+  const iaHintEl = document.getElementById('ia-hint');
+  if(iaHintEl) iaHintEl.textContent = t('iaHint');
+  const btnGen = document.getElementById('btn-gen');
+  if(btnGen && !btnGen.disabled) btnGen.innerHTML = `<span>✨</span> ${t('btnGenerate')}`;
+  ql('manual-criteria-lbl', 'manualLabel');
+  qtxt('btn-add-crit-main', 'btnAddCrit');
+  // Step 4 exports
+  qtxt('btn-exp-pdf', 'btnExportPDF'); qtxt('btn-exp-csv', 'btnExportCSV');
+  qtxt('btn-save-tpl', 'btnSaveTpl'); qtxt('btn-share', 'btnShare');
+  // Step 5
+  const emptyEl = document.querySelector('#template-list .empty-state p');
+  if(emptyEl) emptyEl.innerHTML = t('emptyTpl');
+  // Card titles via data-i18n
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if(T[lang][key]) el.textContent = T[lang][key];
+  });
+  // Prompt preview if on step 3
+  if(currentStep === 3) prepareIAPanel();
+}
+
+function ql(id, key) { const el=document.getElementById(id); if(el) el.textContent=t(key); }
+function qtxt(id, key) { const el=document.getElementById(id); if(el) el.textContent=t(key); }
+function qp(id, key, isLabel) { const el=document.getElementById(id); if(el) el.placeholder=t(key); }
+function qt(id, key) { const el=document.getElementById(id); if(el) el.textContent=t(key); }
+
+// ── State ──
+const state = {
+  grade: '', section: '', date: '', skill: '', activity: '', desc: '',
+  type: 'cotejo',
+  students: [],
+  criteria: [],
+  scores: {},
+};
+
+const PROXY_URL = 'https://eq-proxy.vercel.app/api/deepseek'; // Reemplaza con tu proxy real
+
+// ── Navigation ──
+let currentStep = 1;
+function goStep(n) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.step-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + n).classList.add('active');
+  document.getElementById('tab-' + n).classList.add('active');
+  for(let i=1;i<n;i++) document.getElementById('tab-'+i).classList.add('done');
+  currentStep = n;
+  if(n===3) prepareIAPanel();
+  if(n===5) renderTemplates();
+}
+function showPanel(name) {
+  if(name==='templates') goStep(5);
+}
+
+// ── Type selector ──
+function selectType(el) {
+  document.querySelectorAll('.type-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.type = el.dataset.type;
+}
+
+// ── CSV Upload ──
+const uploadZone = document.getElementById('upload-zone');
+uploadZone.addEventListener('dragover', e=>{ e.preventDefault(); uploadZone.classList.add('drag'); });
+uploadZone.addEventListener('dragleave', ()=>uploadZone.classList.remove('drag'));
+uploadZone.addEventListener('drop', e=>{ e.preventDefault(); uploadZone.classList.remove('drag'); handleCSV({target:{files:e.dataTransfer.files}}); });
+
+function handleCSV(e) {
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const lines = ev.target.result.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+    lines.forEach(name => { if(!state.students.includes(name)) state.students.push(name); });
+    renderStudents();
+  };
+  reader.readAsText(file);
+}
+
+function addManual() {
+  const inp = document.getElementById('manual-name');
+  const val = inp.value.trim();
+  if(!val) return;
+  if(!state.students.includes(val)) state.students.push(val);
+  inp.value = '';
+  renderStudents();
+}
+
+function removeStudent(i) {
+  state.students.splice(i,1);
+  renderStudents();
+}
+
+function renderStudents() {
+  const list = document.getElementById('student-list');
+  list.innerHTML = state.students.map((s,i)=>
+    `<div class="student-chip">${s}<button onclick="removeStudent(${i})">×</button></div>`
+  ).join('');
+  document.getElementById('student-count').textContent = state.students.length;
+}
+
+// ── Step 3: IA Panel ──
+function prepareIAPanel() {
+  syncState();
+  const gradeLabel = lang==='en' ? 'Grade' : 'Grado';
+  const skillLabel = lang==='en' ? 'Skill' : 'Skill';
+  const actLabel   = lang==='en' ? 'Activity' : 'Actividad';
+  const typeLabel2 = lang==='en' ? 'Type' : 'Tipo';
+  const ctx = `${gradeLabel}: ${state.grade||'—'} | ${skillLabel}: ${state.skill||'—'} | ${actLabel}: ${state.activity||'—'} | ${typeLabel2}: ${typeLabel(state.type)}`;
+  document.getElementById('ia-context-box').textContent = ctx;
+  const prompt = buildPrompt();
+  document.getElementById('prompt-preview').textContent = prompt;
+  renderManualCriteria();
+}
+
+function typeLabel(tp) {
+  return {cotejo:t('typeCotejo'),rubrica:t('typeRubrica'),estimacion:t('typeEstimacion'),anecdotico:t('typeAnecdotico'),numerica:t('typeNumerica')}[tp]||tp;
+}
+
+function buildPrompt() {
+  const desc = state.desc ? t('promptContextPfx') + state.desc : '';
+  return t('promptSystem')
+    .replace('{grade}', state.grade)
+    .replace('{section}', state.section)
+    .replace('{skill}', state.skill)
+    .replace('{activity}', state.activity)
+    .replace('{type}', typeLabel(state.type))
+    .replace('{desc}', desc);
+}
+
+async function generateCriteria() {
+  syncState();
+  const btn = document.getElementById('btn-gen');
+  btn.disabled = true;
+  btn.innerHTML = `<div class="spinner"></div> ${t('generating')}`;
+
+  try {
+    const res = await fetch(PROXY_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        max_tokens: 600,
+        messages: [{role:'user', content: buildPrompt()}]
+      })
+    });
+    const data = await res.json();
+    const raw = data.choices?.[0]?.message?.content || '';
+    const clean = raw.replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(clean);
+    state.criteria = parsed.criterios || [];
+    renderManualCriteria();
+    showToast(t('genOK'));
+  } catch(err) {
+    showToast(t('genErr'));
+  }
+  btn.disabled = false;
+  btn.innerHTML = `<span>✨</span> ${t('btnGenerate')}`;
+}
+
+function renderManualCriteria() {
+  const list = document.getElementById('manual-criteria-list');
+  if(!state.criteria.length) state.criteria = ['','',''];
+  list.innerHTML = state.criteria.map((c,i)=>`
+    <div class="criteria-item">
+      <span class="ci-num">${i+1}</span>
+      <input type="text" value="${escH(c)}" placeholder="${t('phCriteria')} ${i+1}…" oninput="state.criteria[${i}]=this.value"/>
+      <button class="ci-del" onclick="removeCriteria(${i})">×</button>
+    </div>`).join('');
+}
+
+function addManualCriteria() {
+  state.criteria.push('');
+  renderManualCriteria();
+}
+
+function removeCriteria(i) {
+  state.criteria.splice(i,1);
+  renderManualCriteria();
+}
+
+// ── Step 4: Build instrument ──
+function buildInstrument() {
+  syncCriteria();
+  const crits = state.criteria.filter(Boolean);
+  if(!crits.length){ showToast(t('errNoCrit')); return; }
+  if(!state.students.length){ showToast(t('errNoSt')); return; }
+  state.criteria = crits;
+
+  document.getElementById('inst-title').textContent = typeLabel(state.type);
+  document.getElementById('inst-meta').textContent =
+    [state.grade, state.section, state.skill, state.activity, state.date].filter(Boolean).join(' · ');
+
+  const legend = document.getElementById('inst-legend');
+  if(state.type==='cotejo') {
+    legend.innerHTML = `
+      <span style="font-size:12px;padding:4px 10px;border-radius:12px;background:#fde8e8;color:#c0392b">${t('l1')}</span>
+      <span style="font-size:12px;padding:4px 10px;border-radius:12px;background:var(--amber-lt);color:var(--amber)">${t('l2')}</span>
+      <span style="font-size:12px;padding:4px 10px;border-radius:12px;background:#e3f0fb;color:#185FA5">${t('l3')}</span>
+      <span style="font-size:12px;padding:4px 10px;border-radius:12px;background:var(--accent-lt);color:var(--accent)">${t('l4')}</span>`;
+  } else if(state.type==='estimacion') {
+    legend.innerHTML = `
+      <span style="font-size:12px;padding:4px 10px;border-radius:12px;background:var(--accent-lt);color:var(--accent)">${t('estS')}</span>
+      <span style="font-size:12px;padding:4px 10px;border-radius:12px;background:var(--amber-lt);color:var(--amber)">${t('estA')}</span>
+      <span style="font-size:12px;padding:4px 10px;border-radius:12px;background:#fde8e8;color:#c0392b">${t('estN')}</span>`;
+  } else { legend.innerHTML = ''; }
+
+  const body = document.getElementById('instrument-body');
+  if(state.type==='cotejo') body.innerHTML = buildCotejo();
+  else if(state.type==='rubrica') body.innerHTML = buildRubrica();
+  else if(state.type==='estimacion') body.innerHTML = buildEstimacion();
+  else if(state.type==='anecdotico') body.innerHTML = buildAnecdotico();
+  else if(state.type==='numerica') body.innerHTML = buildNumerica();
+
+  goStep(4);
+}
+
+function buildCotejo() {
+  const crits = state.criteria;
+  let h = `<div class="score-table-wrap"><table class="score-table"><thead><tr>
+    <th class="name-th">${t('colStudent')}</th>`;
+  crits.forEach(c=>{ h+=`<th>${escH(c)}</th>`; });
+  h+=`<th>${t('colAvg')}</th></tr></thead><tbody>`;
+  state.students.forEach((s,si)=>{
+    h+=`<tr><td class="name-td">${escH(s)}</td>`;
+    crits.forEach((_,ci)=>{
+      const k=`${si}-${ci}`, v=state.scores[k]||0;
+      h+=`<td><div class="score-btns">`;
+      [1,2,3,4].forEach(n=>{ h+=`<button class="sc s${n}${v===n?' on':''}" onclick="setScore(${si},${ci},${n})">${n}</button>`; });
+      h+=`</div></td>`;
+    });
+    h+=`<td class="avg-td" id="avg-${si}">—</td></tr>`;
+  });
+  h+=`</tbody></table></div>`;
+  setTimeout(()=>state.students.forEach((_,si)=>updateAvg(si)),0);
+  return h;
+}
+
+function setScore(si,ci,val) {
+  const k=`${si}-${ci}`;
+  if(state.scores[k]===val) { delete state.scores[k]; }
+  else state.scores[k]=val;
+  document.querySelectorAll(`#panel-4 .score-table tbody tr:nth-child(${si+1}) .sc`).forEach(b=>b.classList.remove('on'));
+  const row = document.querySelectorAll('#panel-4 .score-table tbody tr')[si];
+  const cells = row.querySelectorAll('td');
+  const crits = state.criteria.length;
+  cells[ci+1].querySelectorAll('.sc').forEach((b,idx)=>{
+    b.classList.toggle('on', (state.scores[k]||0)===idx+1);
+  });
+  updateAvg(si);
+}
+
+function updateAvg(si) {
+  const vals = state.criteria.map((_,ci)=>state.scores[`${si}-${ci}`]||0).filter(v=>v>0);
+  const avg = vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1) : '—';
+  const el = document.getElementById('avg-'+si);
+  if(el) el.textContent = avg;
+}
+
+function buildRubrica() {
+  const levels = [t('rubLvl4'), t('rubLvl3'), t('rubLvl2'), t('rubLvl1')];
+  let h = `<div class="rubric-grid"><table class="rubric-table"><thead><tr><th>${t('phCriteria')}</th>`;
+  levels.forEach(l=>h+=`<th>${l}</th>`);
+  h+=`</tr></thead><tbody>`;
+  state.criteria.forEach((c,ci)=>{
+    h+=`<tr><td>${escH(c)}</td>`;
+    [4,3,2,1].forEach(lv=>{
+      const k=`rub-${ci}-${lv}`;
+      const v=state.scores[k]||'';
+      h+=`<td><textarea placeholder="${t('rubPlh')} ${lv}…" oninput="state.scores['${k}']=this.value">${escH(v)}</textarea></td>`;
+    });
+    h+=`</tr>`;
+  });
+  h+=`</tbody></table></div>`;
+  return h;
+}
+
+function buildEstimacion() {
+  const opts = [t('estS'), t('estA'), t('estN')];
+  let h = `<div class="score-table-wrap"><table class="score-table"><thead><tr><th class="name-th">${t('colStudent')}</th>`;
+  state.criteria.forEach(c=>h+=`<th>${escH(c)}</th>`);
+  h+=`</tr></thead><tbody>`;
+  state.students.forEach((s,si)=>{
+    h+=`<tr><td class="name-td">${escH(s)}</td>`;
+    state.criteria.forEach((_,ci)=>{
+      const k=`est-${si}-${ci}`, v=state.scores[k]||'';
+      h+=`<td><div class="est-btns">`;
+      opts.forEach((o,oi)=>{
+        h+=`<button class="eb e${oi}${v===o?' on':''}" onclick="setEst(${si},${ci},'${escH(o)}',this)">${o}</button>`;
+      });
+      h+=`</div></td>`;
+    });
+    h+=`</tr>`;
+  });
+  h+=`</tbody></table></div>`;
+  return h;
+}
+
+function setEst(si,ci,val,btn) {
+  const k=`est-${si}-${ci}`;
+  const already = state.scores[k]===val;
+  state.scores[k] = already ? '' : val;
+  const row = btn.closest('tr');
+  const cellIdx = ci+1;
+  row.querySelectorAll('td').item(cellIdx).querySelectorAll('.eb').forEach(b=>b.classList.remove('on'));
+  if(!already) btn.classList.add('on');
+}
+
+function buildAnecdotico() {
+  let h = `<table class="anec-table"><thead><tr>
+    <th style="width:160px">${t('colStudent')}</th>
+    <th>${t('colObs')}</th></tr></thead><tbody>`;
+  state.students.forEach((s,si)=>{
+    const k=`anec-${si}`, v=state.scores[k]||'';
+    h+=`<tr><td class="name-cell">${escH(s)}</td>
+    <td><textarea placeholder="${t('anecPlh')} ${escH(s)}…" oninput="state.scores['${k}']=this.value">${escH(v)}</textarea></td></tr>`;
+  });
+  h+=`</tbody></table>`;
+  return h;
+}
+
+function buildNumerica() {
+  let h = `<div class="score-table-wrap"><table class="score-table"><thead><tr><th class="name-th">${t('colStudent')}</th>`;
+  state.criteria.forEach(c=>h+=`<th>${escH(c)}</th>`);
+  h+=`<th>${t('colTotal')}</th></tr></thead><tbody>`;
+  state.students.forEach((s,si)=>{
+    h+=`<tr><td class="name-td">${escH(s)}</td>`;
+    state.criteria.forEach((_,ci)=>{
+      const k=`num-${si}-${ci}`, v=state.scores[k]||'';
+      h+=`<td><input type="number" class="num-input" min="0" max="100" value="${v}" placeholder="0" oninput="state.scores['${k}']=this.value;updateTotal(${si})"/></td>`;
+    });
+    h+=`<td class="avg-td" id="total-${si}">—</td></tr>`;
+  });
+  h+=`</tbody></table></div>`;
+  setTimeout(()=>state.students.forEach((_,si)=>updateTotal(si)),0);
+  return h;
+}
+
+function updateTotal(si) {
+  const vals = state.criteria.map((_,ci)=>parseFloat(state.scores[`num-${si}-${ci}`])||0);
+  const sum = vals.reduce((a,b)=>a+b,0);
+  const el = document.getElementById('total-'+si);
+  if(el) el.textContent = sum.toFixed(0);
+}
+
+function exportPDF() {
+  window.print();
+  showToast(t('printToast'));
+}
+
+function exportCSV() {
+  syncState();
+  const crits = state.criteria;
+  const rows = [[t('colStudent'), ...crits, t('colAvg')+'/'+t('colTotal')]];
+  state.students.forEach((s,si)=>{
+    const vals = crits.map((_,ci)=>{
+      if(state.type==='cotejo') return state.scores[`${si}-${ci}`]||'';
+      if(state.type==='numerica') return state.scores[`num-${si}-${ci}`]||'';
+      if(state.type==='estimacion') return state.scores[`est-${si}-${ci}`]||'';
+      if(state.type==='anecdotico') return state.scores[`anec-${si}`]||'';
+      return '';
+    });
+    const nums = vals.map(v=>parseFloat(v)).filter(n=>!isNaN(n));
+    const avg = nums.length ? (nums.reduce((a,b)=>a+b,0)/nums.length).toFixed(1) : '';
+    rows.push([s,...vals,avg]);
+  });
+  const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `instrumento_${state.grade}_${state.skill||'evaluacion'}.csv`.replace(/\s+/g,'_');
+  a.click();
+  showToast(t('csvToast'));
+}
+
+function saveTemplate() {
+  syncState();
+  const templates = JSON.parse(localStorage.getItem('instr_templates')||'[]');
+  const tpl = {
+    id: Date.now(),
+    name: `${typeLabel(state.type)} — ${state.grade} ${state.skill||''}`.trim(),
+    grade: state.grade, skill: state.skill, activity: state.activity,
+    type: state.type, criteria: [...state.criteria],
+    date: new Date().toLocaleDateString(lang==='en'?'en-US':'es-PA')
+  };
+  templates.unshift(tpl);
+  localStorage.setItem('instr_templates', JSON.stringify(templates.slice(0,20)));
+  showToast(t('saveToast'));
+}
+
+function shareLink() {
+  syncState();
+  const data = {g:state.grade,s:state.section,sk:state.skill,a:state.activity,tp:state.type,c:state.criteria,st:state.students};
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+  const url = location.href.split('?')[0]+'?d='+encoded;
+  if(navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(()=>showToast(t('shareToast')));
+  } else {
+    prompt('Copy this link:', url);
+  }
+}
+
+function renderTemplates() {
+  const templates = JSON.parse(localStorage.getItem('instr_templates')||'[]');
+  const list = document.getElementById('template-list');
+  if(!templates.length) {
+    list.innerHTML = `<div class="empty-state"><div class="es-icon">📂</div><p>${t('emptyTpl')}</p></div>`;
+    return;
+  }
+  list.innerHTML = templates.map(tpl=>`
+    <div class="template-item" onclick="loadTemplate(${tpl.id})">
+      <div>
+        <div class="ti-name">${escH(tpl.name)}</div>
+        <div class="ti-meta">${tpl.criteria.length} ${t('criteriaCount')} · ${t('savedOn')} ${tpl.date}</div>
+      </div>
+      <button class="ti-del" onclick="event.stopPropagation();deleteTemplate(${tpl.id})">×</button>
+    </div>`).join('');
+}
+
+function loadTemplate(id) {
+  const templates = JSON.parse(localStorage.getItem('instr_templates')||'[]');
+  const tpl = templates.find(x=>x.id===id); if(!tpl) return;
+  document.getElementById('cfg-grade').value = tpl.grade||'';
+  document.getElementById('cfg-skill').value = tpl.skill||'';
+  document.getElementById('cfg-activity').value = tpl.activity||'';
+  state.criteria = [...tpl.criteria];
+  state.type = tpl.type;
+  document.querySelectorAll('.type-card').forEach(c=>{
+    c.classList.toggle('selected', c.dataset.type===tpl.type);
+  });
+  showToast(t('loadToast'));
+  goStep(1);
+}
+
+function deleteTemplate(id) {
+  let templates = JSON.parse(localStorage.getItem('instr_templates')||'[]');
+  templates = templates.filter(x=>x.id!==id);
+  localStorage.setItem('instr_templates', JSON.stringify(templates));
+  renderTemplates();
+  showToast(t('deleteToast'));
+}
+
+// ── Helpers ──
+function syncState() {
+  state.grade = document.getElementById('cfg-grade').value;
+  state.section = document.getElementById('cfg-section').value;
+  state.date = document.getElementById('cfg-date').value;
+  state.skill = document.getElementById('cfg-skill').value;
+  state.activity = document.getElementById('cfg-activity').value;
+  state.desc = document.getElementById('cfg-desc').value;
+}
+
+function syncCriteria() {
+  state.criteria = Array.from(document.querySelectorAll('#manual-criteria-list input')).map(i=>i.value.trim()).filter(Boolean);
+}
+
+function escH(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+// ── Init ──
+document.getElementById('cfg-date').value = new Date().toISOString().split('T')[0];
+
+// Load from share link
+try {
+  const params = new URLSearchParams(location.search);
+  if(params.get('d')) {
+    const data = JSON.parse(decodeURIComponent(escape(atob(params.get('d')))));
+    document.getElementById('cfg-grade').value = data.g||'';
+    document.getElementById('cfg-section').value = data.s||'';
+    document.getElementById('cfg-skill').value = data.sk||'';
+    document.getElementById('cfg-activity').value = data.a||'';
+    state.type = data.t||'cotejo';
+    state.criteria = data.c||[];
+    state.students = data.st||[];
+    document.querySelectorAll('.type-card').forEach(c=>c.classList.toggle('selected',c.dataset.type===state.type));
+    renderStudents();
+    showToast(t('linkToast'));
+  }
+} catch(e){}
+
+// Service Worker registration
+if('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+// Apply language on init
+applyLang();
+</script>
+</body>
+</html>
